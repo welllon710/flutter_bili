@@ -1,0 +1,44 @@
+import 'package:get/get.dart';
+import 'package:get_demo/app/data/models/category.dart';
+import 'package:get_demo/app/data/models/dish.dart';
+import 'package:get_demo/app/data/repositories/homeRepo.dart';
+
+class HomeController extends GetxController {
+  final HomeRepo repo = Get.find<HomeRepo>();
+
+  var selected = 0.obs;
+  var categoryList = <Category>[].obs;
+  var products = <Dish>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _fetchCategories();
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+  }
+
+  @override
+  void onClose() {
+    super.onClose();
+  }
+
+  void setSelected(int index, categoryId) {
+    selected.value = index;
+    _fetchProduct(categoryId);
+  }
+
+  _fetchProduct(categoryId) async {
+    var list = await repo.getProducts(categoryId);
+    products.value = list;
+  }
+
+  // 获取分类列表
+  Future<void> _fetchCategories() async {
+    var list = await repo.getCategoryList();
+    categoryList.value = list;
+  }
+}

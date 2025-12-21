@@ -10,6 +10,8 @@ class HomeController extends GetxController {
   var categoryList = <Category>[].obs;
   var products = <Dish>[].obs;
 
+  var selectedFlavor = {}.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -29,6 +31,24 @@ class HomeController extends GetxController {
   void setSelected(int index, categoryId) {
     selected.value = index;
     _fetchProduct(categoryId);
+  }
+
+  // 选择口味
+  selectFlavor(int index, String flavor) {
+    selectedFlavor.value[index] = flavor;
+    selectedFlavor.value = {...selectedFlavor.value};
+  }
+
+  void reset() {
+    selectedFlavor.value = {}.obs;
+  }
+
+  addCart(Dish product) {
+    print('添加购物车 ${selectedFlavor.value} ${product}');
+  }
+
+  showCart() {
+    print('显示购物车');
   }
 
   _fetchProduct(categoryId) async {

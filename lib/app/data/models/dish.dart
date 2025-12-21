@@ -1,8 +1,10 @@
+import 'dart:convert';
+
 class DishFlavor {
   final int id;
   final int dishId;
   final String name;
-  final dynamic value;
+  final List value;
 
   DishFlavor({
     required this.id,
@@ -16,7 +18,7 @@ class DishFlavor {
       id: json['id'],
       dishId: json['dishId'],
       name: json['name'],
-      value: json['value'],
+      value: JsonDecoder().convert(json['value']),
     );
   }
 

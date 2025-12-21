@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:get_demo/app/modules/home/widgets/cart_list.dart';
+import 'package:get_demo/app/modules/home/widgets/dish_flavors.dart';
 
 import '../controllers/home_controller.dart';
 
@@ -161,7 +163,7 @@ class HomeView extends GetView<HomeController> {
                     ],
                   ),
                 ),
-                _buildCart(),
+                buildCart(),
               ],
             ),
           ),
@@ -170,7 +172,7 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  Widget _buildCart() {
+  Widget buildCart() {
     return AnimatedContainer(
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
       duration: Duration(milliseconds: 300),
@@ -178,7 +180,12 @@ class HomeView extends GetView<HomeController> {
       height: 100,
       child: Row(
         children: [
-          _buildBadge(),
+          _buildBadge(() {
+            Get.bottomSheet(
+              CartList(),
+              isScrollControlled: true, // 👈 高度可控
+            );
+          }),
           SizedBox(width: 10),
           Text("￥3.19", style: TextStyle(color: Colors.red, fontSize: 30)),
           Spacer(),
@@ -282,7 +289,6 @@ class HomeView extends GetView<HomeController> {
           var product = controller.products[index];
           // flavors 已在模型中处理为非空列表，直接判断是否为空
           var isFlavours = product.flavors.isNotEmpty;
-          print('isFlavours: ${product.flavors}');
           return Container(
             padding: EdgeInsets.all(6),
             child: Row(
@@ -323,18 +329,32 @@ class HomeView extends GetView<HomeController> {
                               padding: EdgeInsets.zero,
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
+                            child: GestureDetector(
+                              onTap: () async {
+                                if (isFlavours) {
+                                  await Get.dialog(
+                                    barrierDismissible: false,
+                                    DishFlavors(flavors: product.flavors),
+                                  );
+                                  controller.reset();
+                                  controller.addCart(product);
+                                } else {
+                                  controller.addCart(product);
+                                }
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                child:
+                                    isFlavours
+                                        ? Text(
+                                          '选择规格',
+                                          style: TextStyle(color: Colors.black),
+                                        )
+                                        : Icon(Icons.add, size: 20),
                               ),
-                              child:
-                                  isFlavours
-                                      ? Text(
-                                        '选择规格',
-                                        style: TextStyle(color: Colors.black),
-                                      )
-                                      : Icon(Icons.add, size: 20),
                             ),
                           ),
                           SizedBox(width: 10),
@@ -351,29 +371,38 @@ class HomeView extends GetView<HomeController> {
     });
   }
 
-  Widget _buildBadge() {
-    return Stack(
-      children: [
-        Image.asset('assets/images/btn_waiter_sel.png', width: 70, height: 70),
-        Positioned(
-          top: 10,
-          right: 4,
-          child: Container(
-            width: 20,
-            height: 20,
-            decoration: BoxDecoration(
-              color: Colors.red,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Center(
-              child: Text(
-                '1',
-                style: TextStyle(color: Colors.white, fontSize: 12),
+  Widget _buildBadge(Function onTap) {
+    return GestureDetector(
+      onTap: () {
+        onTap();
+      },
+      child: Stack(
+        children: [
+          Image.asset(
+            'assets/images/btn_waiter_sel.png',
+            width: 70,
+            height: 70,
+          ),
+          Positioned(
+            top: 10,
+            right: 4,
+            child: Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(
+                child: Text(
+                  '1',
+                  style: TextStyle(color: Colors.white, fontSize: 12),
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

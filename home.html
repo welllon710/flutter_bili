@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Bilibili Messaging</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#2b3642",
+                        "on-tertiary": "#462a00",
+                        "primary-fixed-dim": "#86cfff",
+                        "on-primary-fixed-variant": "#004c6d",
+                        "secondary-container": "#264a61",
+                        "on-primary-fixed": "#001e2e",
+                        "on-secondary-fixed-variant": "#264a61",
+                        "on-surface-variant": "#bec8d1",
+                        "surface-container-high": "#202b37",
+                        "surface-tint": "#86cfff",
+                        "surface-bright": "#2f3a47",
+                        "on-background": "#d8e3f4",
+                        "surface": "#091420",
+                        "tertiary-fixed": "#ffddb7",
+                        "inverse-primary": "#00658f",
+                        "outline-variant": "#3e4850",
+                        "on-primary": "#00344c",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "tertiary-container": "#d18812",
+                        "on-secondary-container": "#96bad4",
+                        "inverse-on-surface": "#26313e",
+                        "tertiary": "#ffb95d",
+                        "primary": "#86cfff",
+                        "on-secondary-fixed": "#001e2e",
+                        "on-secondary": "#0a344a",
+                        "surface-container-low": "#111c28",
+                        "primary-container": "#24a1de",
+                        "surface-container-lowest": "#040f1a",
+                        "on-error-container": "#ffdad6",
+                        "on-surface": "#d8e3f4",
+                        "on-tertiary-fixed": "#2a1700",
+                        "secondary-fixed-dim": "#a7cbe6",
+                        "primary-fixed": "#c8e6ff",
+                        "error": "#ffb4ab",
+                        "surface-dim": "#091420",
+                        "surface-container": "#15202c",
+                        "tertiary-fixed-dim": "#ffb95d",
+                        "outline": "#88929b",
+                        "inverse-surface": "#d8e3f4",
+                        "on-tertiary-container": "#462a00",
+                        "secondary-fixed": "#c8e6ff",
+                        "on-primary-container": "#00344c",
+                        "background": "#091420",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "surface-container-highest": "#2b3642",
+                        "secondary": "#a7cbe6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        body {
+            background-color: #091420;
+            color: #d8e3f4;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+    <!-- TopAppBar -->
+    <header
+        class="bg-[#111c28]/80 backdrop-blur-xl docked full-width top-0 z-50 flex items-center justify-between px-4 h-16 w-full fixed">
+        <div class="flex items-center gap-6">
+            <button
+                class="text-[#bec8d1] hover:bg-[#202b37] transition-colors p-2 rounded-full active:scale-95 duration-200">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <h1 class="font-inter text-lg font-bold tracking-tight text-[#86cfff]">Bilibili</h1>
+        </div>
+        <div class="flex items-center gap-2">
+            <button
+                class="text-[#bec8d1] hover:bg-[#202b37] transition-colors p-2 rounded-full active:scale-95 duration-200">
+                <span class="material-symbols-outlined">search</span>
+            </button>
+            <button
+                class="text-[#bec8d1] hover:bg-[#202b37] transition-colors p-2 rounded-full active:scale-95 duration-200">
+                <span class="material-symbols-outlined">more_vert</span>
+            </button>
+        </div>
+    </header>
+    <!-- Category Tabs (Sub-Header) -->
+    <nav class="fixed top-16 left-0 w-full bg-[#091420] z-40 px-4 py-3">
+        <div
+            class="bg-surface-container-low rounded-full px-2 py-1.5 flex gap-1 overflow-x-auto hide-scrollbar shadow-sm">
+            <button
+                class="px-5 py-1.5 rounded-full bg-primary/20 text-primary font-semibold text-sm whitespace-nowrap transition-all">推荐</button>
+            <button
+                class="px-5 py-1.5 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors text-sm whitespace-nowrap">直播</button>
+            <button
+                class="px-5 py-1.5 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors text-sm whitespace-nowrap">动画</button>
+            <button
+                class="px-5 py-1.5 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors text-sm whitespace-nowrap">番剧</button>
+            <button
+                class="px-5 py-1.5 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors text-sm whitespace-nowrap">国创</button>
+            <button
+                class="px-5 py-1.5 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors text-sm whitespace-nowrap">音乐</button>
+            <button
+                class="px-5 py-1.5 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors text-sm whitespace-nowrap">科技</button>
+        </div>
+    </nav>
+    <!-- Content List (Messaging Layout) -->
+    <main class="pt-36 pb-32 px-0 max-w-3xl mx-auto">
+        <!-- Message Item 1 -->
+        <div
+            class="flex items-center gap-4 px-4 py-3 hover:bg-surface-container-low transition-colors cursor-pointer group">
+            <div class="relative flex-shrink-0">
+                <img alt="老番茄"
+                    class="w-14 h-14 rounded-full object-cover border-2 border-transparent group-hover:border-primary/30 transition-all"
+                    data-alt="Close up portrait of a stylish young man with glasses smiling in a warm studio light with soft blue background"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOl_peuJZlizX31y50HaYg45nwXHn7S2y4-YM4_jOg9SiGnW-73J1xwyEEppKlLJqC6yE2UeucEBDKiNc8pSdOxW_AWU_P3gNucfZpFs63zRX2pSIJzv2vVTEkFovwJENac3lNbB8n53ft2zt7y9Hb2Ln27C7NEkwJuT4NtfcidRBESPq0JWpDPfZVPmx-Rfsw6z0oTHLFJslt66Xss5AthMhRCkRQxpKGyVfxNvb0p2oE3OfXdZVSk4Tn7n60BZ1wZySr2_mJGnaU" />
+                <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-surface rounded-full">
+                </div>
+            </div>
+            <div class="flex-grow min-w-0">
+                <div class="flex justify-between items-baseline">
+                    <h3 class="text-on-surface font-bold text-base truncate">老番茄</h3>
+                    <span class="text-on-surface-variant text-xs font-medium">14:32</span>
+                </div>
+                <h4 class="text-on-surface-variant font-medium text-sm truncate mt-0.5">【史上最惨】这个视频我做了一年...</h4>
+                <div class="flex justify-between items-center mt-1">
+                    <p class="text-on-surface-variant text-xs truncate opacity-80">48.5万次观看 · 2小时前</p>
+                    <span
+                        class="bg-primary-container text-on-primary-container text-[10px] font-bold px-2 py-0.5 rounded-full">12:45</span>
+                </div>
+            </div>
+        </div>
+        <!-- Message Item 2 -->
+        <div
+            class="flex items-center gap-4 px-4 py-3 hover:bg-surface-container-low transition-colors cursor-pointer group">
+            <div class="relative flex-shrink-0">
+                <img alt="极客湾"
+                    class="w-14 h-14 rounded-full object-cover border-2 border-transparent group-hover:border-primary/30 transition-all"
+                    data-alt="Professional tech influencer headshot with neon blue backlighting and clean minimalist composition"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAX2dYuegO0dsbEatzJdc0o0fVd-Q9MLNlJn1ZAUBNtPMb2eEyVR3eOu2A7eIB-2SnBaRU5z-lmyWdhcIVJjl4Tk1sTcP50AFnTpcSppmp4Pv76EC3bfRZtfxq-1gUZp0qU2f6xFnZVyiaAwdtdu4R6MViOs7Cho7U-_XPTdT9HzpvcVI8dREo5k3uCReC1WDl8QJ6v_3492ewggbHHKzhh8IE4sf1OSHHE6amdztbv7P_7K1hLhg4JiK1XVk5dp-X2cf-5jlS_9JdT" />
+                <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-slate-500 border-2 border-surface rounded-full">
+                </div>
+            </div>
+            <div class="flex-grow min-w-0">
+                <div class="flex justify-between items-baseline">
+                    <h3 class="text-on-surface font-bold text-base truncate">极客湾 Geekerwan</h3>
+                    <span class="text-on-surface-variant text-xs font-medium">12:10</span>
+                </div>
+                <h4 class="text-on-surface-variant font-medium text-sm truncate mt-0.5">移动端CPU性能排行榜：谁是真正的王者？</h4>
+                <div class="flex justify-between items-center mt-1">
+                    <p class="text-on-surface-variant text-xs truncate opacity-80">120万次观看 · 5小时前</p>
+                    <span
+                        class="bg-primary-container text-on-primary-container text-[10px] font-bold px-2 py-0.5 rounded-full">25:12</span>
+                </div>
+            </div>
+        </div>
+        <!-- Message Item 3 -->
+        <div
+            class="flex items-center gap-4 px-4 py-3 hover:bg-surface-container-low transition-colors cursor-pointer group">
+            <div class="relative flex-shrink-0">
+                <img alt="影视飓风"
+                    class="w-14 h-14 rounded-full object-cover border-2 border-transparent group-hover:border-primary/30 transition-all"
+                    data-alt="Portrait of a young creative woman in a film studio setting with cinematic orange and teal lighting"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtGLp5AYvqCwjsY6V3txOJY5WmhjEqz4HDWFw0p52XNzVQOomP5eC_pExi6axkJGgeUxo79BVE-qzVMxL-4Gm8V2fuWT_GiO_oqMSuAZ-DF7A-Q2ACi4QYjyfxQADGJGANldTVczg1K7i7R57AD0rWgSjZQ83VJj_pujakFvRzEtIejoHtVxlWvBpw5m-YXCjCvO07nnonPg-Hq7s8K3Bn9ulNuAyYUeoo7D5vZfeygE3hSZ_UNG7Jk46IS7xa7InybukJXReEz88y" />
+            </div>
+            <div class="flex-grow min-w-0">
+                <div class="flex justify-between items-baseline">
+                    <h3 class="text-on-surface font-bold text-base truncate">影视飓风 MediaStorm</h3>
+                    <span class="text-on-surface-variant text-xs font-medium">昨日</span>
+                </div>
+                <h4 class="text-on-surface-variant font-medium text-sm truncate mt-0.5">我们用这台相机拍出了电影感！</h4>
+                <div class="flex justify-between items-center mt-1">
+                    <p class="text-on-surface-variant text-xs truncate opacity-80">85万次观看 · 1天前</p>
+                    <span class="bg-primary/20 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full">NEW</span>
+                </div>
+            </div>
+        </div>
+        <!-- Message Item 4 -->
+        <div
+            class="flex items-center gap-4 px-4 py-3 hover:bg-surface-container-low transition-colors cursor-pointer group">
+            <div class="relative flex-shrink-0">
+                <img alt="罗翔说刑法"
+                    class="w-14 h-14 rounded-full object-cover border-2 border-transparent group-hover:border-primary/30 transition-all"
+                    data-alt="Dignified man in a professional suit against a neutral office background with natural lighting"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJWayXTbsxQxS-1_xV2BwyGqOu-LJo7_gmRoRJDm1ELLzIYTFaPZXrQGB-SST1I0rie9LZJXDRrk4xm4GFhqM8r-BN-slVrtjkYaR-rsjRQAlOlt8f3gHGygR07XJYnei7iX8az-VAe5UMmumHm_tMBgIwHVHSVGfoHc399NM3n5jebiTxQMhDXGBjf6USt1Tt43DE7Htlys3oMjgGGL_cxNXNacEkPRJfYBziN4DqeMBJLlB_vOfc4ROKs9GX2VHfJwO6bxhSh9fD" />
+                <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-surface rounded-full">
+                </div>
+            </div>
+            <div class="flex-grow min-w-0">
+                <div class="flex justify-between items-baseline">
+                    <h3 class="text-on-surface font-bold text-base truncate">罗翔说刑法</h3>
+                    <span class="text-on-surface-variant text-xs font-medium">昨日</span>
+                </div>
+                <h4 class="text-on-surface-variant font-medium text-sm truncate mt-0.5">如何理解正当防卫？张三又出事了...</h4>
+                <div class="flex justify-between items-center mt-1">
+                    <p class="text-on-surface-variant text-xs truncate opacity-80">230万次观看 · 1天前</p>
+                    <span
+                        class="bg-primary-container text-on-primary-container text-[10px] font-bold px-2 py-0.5 rounded-full">15:40</span>
+                </div>
+            </div>
+        </div>
+        <!-- Message Item 5 -->
+        <div
+            class="flex items-center gap-4 px-4 py-3 hover:bg-surface-container-low transition-colors cursor-pointer group">
+            <div class="relative flex-shrink-0">
+                <img alt="绵羊料理"
+                    class="w-14 h-14 rounded-full object-cover border-2 border-transparent group-hover:border-primary/30 transition-all"
+                    data-alt="Smiling female chef in a bright modern kitchen with bokeh effect on kitchenware in the background"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxDT7CMBtIIRTlQRIetwX93D9rBfAGaSI3a65TDq2b-pMEdBGcu1vN1vuuXNZ-f9LRxsTw5SR2Uo232m6E8ohhRra4yu-A5HnPiUaeLeVwSJg_tE6l0fHNl8hY6aG03aB5kjXuoMarq6k2rksVSPf1zn_gi6eJe5dqL1Jbo3xJaELEu-RuuJBizZPgIspEHinut_417tvPpz9C31LStHocXE4KkSrNJFr9mK0I8K8R0v8st3VON5v_Y30x7h499RApQFVP3QBjSFpU" />
+            </div>
+            <div class="flex-grow min-w-0">
+                <div class="flex justify-between items-baseline">
+                    <h3 class="text-on-surface font-bold text-base truncate">绵羊料理</h3>
+                    <span class="text-on-surface-variant text-xs font-medium">周一</span>
+                </div>
+                <h4 class="text-on-surface-variant font-medium text-sm truncate mt-0.5">挑战全网最难做的东坡肉，我翻车了吗？</h4>
+                <div class="flex justify-between items-center mt-1">
+                    <p class="text-on-surface-variant text-xs truncate opacity-80">156万次观看 · 4天前</p>
+                    <span
+                        class="bg-primary-container text-on-primary-container text-[10px] font-bold px-2 py-0.5 rounded-full">08:22</span>
+                </div>
+            </div>
+        </div>
+        <!-- Message Item 6 -->
+        <div
+            class="flex items-center gap-4 px-4 py-3 hover:bg-surface-container-low transition-colors cursor-pointer group">
+            <div class="relative flex-shrink-0">
+                <img alt="手工耿"
+                    class="w-14 h-14 rounded-full object-cover border-2 border-transparent group-hover:border-primary/30 transition-all"
+                    data-alt="Intense looking craftsman in a workshop filled with metallic gadgets and tools, industrial vibe"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6UVMEYxEMS6NC_8zVs5Qdb-aEQL5tjKNOO-nuzcgF9FDMhb338M5b4adUTV6oGgcSVDr1GwjI_YW8zmUgNJLXMC__fCfUNEa3AS71d9ycD_e4wIuE4wVdhm6F31wCGU6yFgbOUtzmyvR3qB-KYDF0D3vkE2FapUBU1eOBRyF1I2aWI15DTj_q-1D2VJpSKWAghoy501hs6l360SstzQAEh-1w-OPjx9Y9OQYBG4JMBGWmJXRqqVHA04CeJSQOS5a5whQyjZutyUiZ" />
+            </div>
+            <div class="flex-grow min-w-0">
+                <div class="flex justify-between items-baseline">
+                    <h3 class="text-on-surface font-bold text-base truncate">手工耿</h3>
+                    <span class="text-on-surface-variant text-xs font-medium">周日</span>
+                </div>
+                <h4 class="text-on-surface-variant font-medium text-sm truncate mt-0.5">为了防止大家迟到，我发明了这个闹钟。</h4>
+                <div class="flex justify-between items-center mt-1">
+                    <p class="text-on-surface-variant text-xs truncate opacity-80">98万次观看 · 5天前</p>
+                    <span
+                        class="bg-primary-container text-on-primary-container text-[10px] font-bold px-2 py-0.5 rounded-full">11:05</span>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- FAB -->
+    <button
+        class="fixed bottom-32 right-6 w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl shadow-black/50 flex items-center justify-center active:scale-90 transition-transform duration-200 z-50">
+        <span class="material-symbols-outlined text-3xl">add</span>
+    </button>
+    <!-- Floating BottomNavBar -->
+    <nav
+        class="fixed bottom-6 left-6 right-6 z-50 bg-[#111c28]/90 backdrop-blur-lg rounded-full h-16 flex justify-around items-center px-4 shadow-[0_32px_64px_-15px_rgba(4,15,26,0.5)]">
+        <div
+            class="flex flex-col items-center justify-center text-[#86cfff] bg-[#202b37] rounded-full p-2 h-12 w-12 transition-all active:scale-90 cursor-pointer">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+            <span class="font-['Inter'] text-[10px] font-medium hidden">Home</span>
+        </div>
+        <div
+            class="flex flex-col items-center justify-center text-[#bec8d1] p-2 hover:text-[#86cfff] transition-all active:scale-90 cursor-pointer">
+            <span class="material-symbols-outlined">explore</span>
+            <span class="font-['Inter'] text-[10px] font-medium hidden">Moments</span>
+        </div>
+        <div
+            class="flex flex-col items-center justify-center text-[#bec8d1] p-2 hover:text-[#86cfff] transition-all active:scale-90 cursor-pointer">
+            <span class="material-symbols-outlined">add_circle</span>
+            <span class="font-['Inter'] text-[10px] font-medium hidden">Post</span>
+        </div>
+        <div
+            class="flex flex-col items-center justify-center text-[#bec8d1] p-2 hover:text-[#86cfff] transition-all active:scale-90 cursor-pointer">
+            <span class="material-symbols-outlined">subscriptions</span>
+            <span class="font-['Inter'] text-[10px] font-medium hidden">Anime</span>
+        </div>
+        <div
+            class="flex flex-col items-center justify-center text-[#bec8d1] p-2 hover:text-[#86cfff] transition-all active:scale-90 cursor-pointer">
+            <span class="material-symbols-outlined">person</span>
+            <span class="font-['Inter'] text-[10px] font-medium hidden">Me</span>
+        </div>
+    </nav>
+</body>
+
+</html>

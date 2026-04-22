@@ -8,6 +8,7 @@ abstract class Routes {
   static const FEED = _Paths.FEED;
   static const ME = _Paths.ME;
   static const BOTTOM_BAR = _Paths.BOTTOM_BAR;
+  static const SEARCH = _Paths.SEARCH;
 }
 
 abstract class _Paths {
@@ -17,4 +18,5 @@ abstract class _Paths {
   static const FEED = '/feed';
   static const ME = '/me';
   static const BOTTOM_BAR = '/bottom-bar';
+  static const SEARCH = '/search';
 }

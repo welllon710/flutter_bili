@@ -10,6 +10,8 @@ import '../modules/me/bindings/me_binding.dart';
 import '../modules/me/views/me_view.dart';
 import '../modules/rank/bindings/rank_binding.dart';
 import '../modules/rank/views/rank_view.dart';
+import '../modules/search/bindings/search_binding.dart';
+import '../modules/search/views/search_view.dart';
 
 part 'app_routes.dart';
 
@@ -39,6 +41,11 @@ class AppPages {
       name: _Paths.BOTTOM_BAR,
       page: () => const BottomBarView(),
       binding: BottomBarBinding(),
+    ),
+    GetPage(
+      name: _Paths.SEARCH,
+      page: () => const SearchView(),
+      binding: SearchBinding(),
     ),
   ];
 }

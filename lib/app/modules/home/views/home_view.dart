@@ -4,6 +4,7 @@ import 'package:get_demo/app/core/theme/theme_controller.dart';
 import 'package:get_demo/app/modules/home/views/bangumi.dart';
 import 'package:get_demo/app/modules/home/views/hot.dart';
 import 'package:get_demo/app/modules/home/views/recommend.dart';
+import 'package:get_demo/app/routes/app_pages.dart';
 
 import '../controllers/home_controller.dart';
 
@@ -36,35 +37,37 @@ class HomeView extends GetView<HomeController> {
               Icon(Icons.explore_rounded, size: 35),
               const SizedBox(width: 12),
               Expanded(
-                child: Container(
-                  height: 36,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(32),
-                    border: Border.all(
-                      color: theme.dividerColor.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 16),
-                      Icon(
-                        Icons.search_rounded,
-                        size: 20,
-                        color: theme.textTheme.bodyMedium?.color?.withValues(
-                          alpha: 0.6,
-                        ),
+                child: GestureDetector(
+                  onTap: () => Get.toNamed(Routes.SEARCH),
+                  child: Container(
+                    height: 36,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(
+                        color: theme.dividerColor.withValues(alpha: 0.5),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '搜索视频、UP 主、专栏',
-                        style: TextStyle(
+                    ),
+                    child: Row(
+                      children: [
+                        const SizedBox(width: 16),
+                        Icon(
+                          Icons.search_rounded,
+                          size: 20,
                           color: theme.textTheme.bodyMedium?.color?.withValues(
                             alpha: 0.6,
                           ),
-                          fontSize: 14,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Text(
+                          '搜索视频、UP 主、专栏',
+                          style: TextStyle(
+                            color: theme.textTheme.bodyMedium?.color
+                                ?.withValues(alpha: 0.6),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

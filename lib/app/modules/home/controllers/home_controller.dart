@@ -80,15 +80,25 @@ class HomeController extends GetxController {
   }
 
   Future<IndicatorResult> onRefreshHotVideos() async {
+    if (!_hotHasMore) {
+      return IndicatorResult.noMore;
+    }
+
     try {
-      hotPn = 1;
+      final int nextPn = hotPn + 1;
       final List<HotVideoItemModel> result = await homeRepo.hotVideoList(
-        pn: hotPn,
+        pn: nextPn,
         ps: hotPs,
       );
-      hotVideoList.assignAll(result);
+      if (result.isEmpty) {
+        _hotHasMore = false;
+        return IndicatorResult.noMore;
+      }
+
+      hotPn = nextPn;
+      hotVideoList.insertAll(0, result);
       _hotHasMore = result.length >= hotPs;
-      return IndicatorResult.success;
+      return _hotHasMore ? IndicatorResult.success : IndicatorResult.noMore;
     } catch (_) {
       return IndicatorResult.fail;
     }

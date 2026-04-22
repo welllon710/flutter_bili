@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:get_demo/app/core/network/dio_client.dart';
 import 'package:get_demo/app/core/theme/theme_controller.dart';
 import 'package:get_demo/app/core/theme/theme_data.dart';
 
 import 'app/routes/app_pages.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await WooHttpUtil().initSessionContext();
   Get.put(ThemeController(), permanent: true);
 
   runApp(

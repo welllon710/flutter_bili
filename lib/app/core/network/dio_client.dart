@@ -1,11 +1,16 @@
 // ignore_for_file: depend_on_referenced_packages
 
+import 'dart:convert';
 import 'dart:io';
+import 'dart:math' show Random;
+import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_demo/app/core/network/api.dart';
 import 'package:get_demo/app/core/network/constants.dart';
 import 'package:get_demo/app/data/models/error_message_model.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 const String APPLICATION_JSON = "application/json";
@@ -21,7 +26,14 @@ class WooHttpUtil {
   static final WooHttpUtil _instance = WooHttpUtil._internal();
   factory WooHttpUtil() => _instance;
 
+  static final RegExp _spmPrefixExp = RegExp(
+    r'<meta name="spm_prefix" content="([^"]+?)">',
+  );
+  static String? _buvid;
+
   late Dio _dio;
+  CookieManager? _cookieManager;
+  Future<void>? _sessionInitFuture;
 
   String headerUa({type = 'mob'}) {
     String headerUa = '';
@@ -81,6 +93,120 @@ class WooHttpUtil {
 
     // 拦截器
     _dio.interceptors.add(RequestInterceptors());
+  }
+
+  Future<void> initSessionContext() {
+    _sessionInitFuture ??= _initSessionContextInternal();
+    return _sessionInitFuture!;
+  }
+
+  Future<void> _initSessionContextInternal() async {
+    final String cookiePath = await _getCookiePath();
+    final PersistCookieJar cookieJar = PersistCookieJar(
+      ignoreExpires: true,
+      storage: FileStorage(cookiePath),
+    );
+    _cookieManager = CookieManager(cookieJar);
+    if (!_dio.interceptors.any((it) => it is CookieManager)) {
+      _dio.interceptors.insert(0, _cookieManager!);
+    }
+
+    try {
+      // 预热 cookie，上下文更接近浏览器侧请求。
+      await _dio.get(HttpString.baseUrl);
+    } catch (_) {}
+
+    try {
+      await _buvidActivate();
+    } catch (_) {}
+
+    try {
+      await getBuvid();
+    } catch (_) {}
+
+    await _refreshCookieHeader();
+  }
+
+  Future<String> _getCookiePath() async {
+    final Directory baseDir = await getApplicationSupportDirectory();
+    final Directory cookieDir = Directory('${baseDir.path}/cookies');
+    if (!cookieDir.existsSync()) {
+      cookieDir.createSync(recursive: true);
+    }
+    return cookieDir.path;
+  }
+
+  Future<void> _refreshCookieHeader() async {
+    final CookieManager? manager = _cookieManager;
+    if (manager == null) return;
+    final List<Cookie> cookies = await manager.cookieJar.loadForRequest(
+      Uri.parse(HttpString.baseUrl),
+    );
+    if (cookies.isEmpty) return;
+    final String cookieString = cookies
+        .map((Cookie c) => '${c.name}=${c.value}')
+        .join('; ');
+    _dio.options.headers['cookie'] = cookieString;
+  }
+
+  Future<void> _buvidActivate() async {
+    final Response htmlResponse = await _dio.get(
+      Api.dynamicSpmPrefix,
+      options: Options(responseType: ResponseType.plain),
+    );
+    final String html = (htmlResponse.data ?? '').toString();
+    final Match? match = _spmPrefixExp.firstMatch(html);
+    if (match == null) return;
+    final String spmPrefix = match.group(1)!;
+
+    final Random rand = Random();
+    final String randPngEnd = base64.encode(
+      List<int>.generate(32, (_) => rand.nextInt(256)) +
+          List<int>.filled(4, 0) +
+          [73, 69, 78, 68] +
+          List<int>.generate(4, (_) => rand.nextInt(256)),
+    );
+
+    final String jsonData = json.encode({
+      '3064': 1,
+      '39c8': '$spmPrefix.fp.risk',
+      '3c43': {
+        'adca': 'Linux',
+        'bfe9': randPngEnd.substring(randPngEnd.length - 50),
+      },
+    });
+
+    await _dio.post(
+      Api.activateBuvidApi,
+      data: {'payload': jsonData},
+      options: Options(contentType: 'application/json'),
+    );
+  }
+
+  Future<String> getBuvid() async {
+    if (_buvid != null && _buvid!.isNotEmpty) {
+      return _buvid!;
+    }
+    final CookieManager? manager = _cookieManager;
+    if (manager != null) {
+      final List<Cookie> cookies = await manager.cookieJar.loadForRequest(
+        Uri.parse(HttpString.baseUrl),
+      );
+      final Cookie? buvidCookie = cookies.cast<Cookie?>().firstWhere(
+        (Cookie? c) => c?.name == 'buvid3',
+        orElse: () => null,
+      );
+      if (buvidCookie != null && buvidCookie.value.isNotEmpty) {
+        _buvid = buvidCookie.value;
+        return _buvid!;
+      }
+    }
+
+    final Response result = await _dio.get(
+      "${HttpString.apiBaseUrl}/x/frontend/finger/spi",
+    );
+    _buvid = (result.data?['data']?['b_3'] ?? '').toString();
+    return _buvid ?? '';
   }
 
   /// get 请求

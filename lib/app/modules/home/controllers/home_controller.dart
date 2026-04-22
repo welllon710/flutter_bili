@@ -1,33 +1,37 @@
 import 'package:get/get.dart';
 import 'package:easy_refresh/easy_refresh.dart';
+import 'package:get_demo/app/data/models/bangumi_list_data_model.dart';
+import 'package:get_demo/app/data/models/hot_video_item_model.dart';
+import 'package:get_demo/app/data/models/rec_video_item_model.dart';
+import 'package:get_demo/app/data/repositories/homeRepo.dart';
 
 class HomeController extends GetxController {
   var currentIndex = 0.obs;
-  final RxList<Map<String, String>> videoList = <Map<String, String>>[].obs;
+  final RxList<RecVideoItemModel> videoList = <RecVideoItemModel>[].obs;
+  final RxList<HotVideoItemModel> hotVideoList = <HotVideoItemModel>[].obs;
+  final RxList<BangumiListItemModel> bangumiList = <BangumiListItemModel>[].obs;
 
-  static const int _pageSize = 6;
-  static const int _maxPage = 4;
-  int _page = 1;
+  HomeRepo homeRepo = Get.put(HomeRepo());
 
-  final List<Map<String, String>> _mockPool = <Map<String, String>>[
-    {'title': '2026 春季新番导视', 'up': '追番小助手', 'meta': '38.2万播放 · 1.2万点赞'},
-    {'title': '手机影像旗舰横评', 'up': '极客观测站', 'meta': '112万播放 · 6.5万点赞'},
-    {'title': '零基础入门 Flutter 动画', 'up': '代码研究所', 'meta': '21.7万播放 · 1.8万点赞'},
-    {'title': '城市夜景航拍混剪', 'up': '航拍纪实', 'meta': '67.3万播放 · 4.1万点赞'},
-    {'title': '30 分钟学会拍 Vlog', 'up': '影像手册', 'meta': '40.9万播放 · 2.3万点赞'},
-    {'title': '高能燃向剪辑合集', 'up': '热血剪辑师', 'meta': '95.6万播放 · 7.0万点赞'},
-    {'title': '咖啡器具全解析', 'up': '慢生活实验室', 'meta': '18.4万播放 · 9.6千点赞'},
-    {'title': '2026 前端趋势观察', 'up': '前端情报局', 'meta': '26.8万播放 · 1.1万点赞'},
-    {'title': '影视灯光布光实战', 'up': '片场手册', 'meta': '32.5万播放 · 1.9万点赞'},
-    {'title': '地铁通勤效率指南', 'up': '效率研究院', 'meta': '15.2万播放 · 8.4千点赞'},
-    {'title': '热门游戏帧率对比', 'up': '硬件实验室', 'meta': '76.4万播放 · 3.7万点赞'},
-    {'title': '周末 4K 纪录短片', 'up': '山海记录者', 'meta': '29.9万播放 · 1.5万点赞'},
-  ];
+  // 单页返回的记录条数
+  final int ps = 12;
+  final int hotPs = 20;
+  final int bangumiPs = 15;
+
+  // 当前翻页号，对应接口 fresh_idx
+  int freshIdx = 0;
+  bool _hasMore = true;
+  int hotPn = 1;
+  bool _hotHasMore = true;
+  int bangumiPage = 1;
+  bool _bangumiHasMore = true;
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
-    videoList.assignAll(_buildPageData(page: _page));
+    await _loadFirstPage();
+    await _loadHotFirstPage();
+    await _loadBangumiFirstPage();
   }
 
   void changeTab(int index) {
@@ -35,35 +39,172 @@ class HomeController extends GetxController {
   }
 
   Future<IndicatorResult> onRefreshVideos() async {
-    await Future<void>.delayed(const Duration(milliseconds: 600));
-    _page = 1;
-    videoList.assignAll(_buildPageData(page: _page));
-    return IndicatorResult.success;
+    try {
+      freshIdx = 0;
+      final List<RecVideoItemModel> result = await homeRepo.rcmdVideoList(
+        ps: ps,
+        freshIdx: freshIdx,
+      );
+      videoList.assignAll(result);
+      _hasMore = result.length >= ps;
+      return IndicatorResult.success;
+    } catch (_) {
+      return IndicatorResult.fail;
+    }
   }
 
   Future<IndicatorResult> onLoadVideos() async {
-    await Future<void>.delayed(const Duration(milliseconds: 650));
-    if (_page >= _maxPage) {
+    if (!_hasMore) {
       return IndicatorResult.noMore;
     }
-    _page += 1;
-    videoList.addAll(_buildPageData(page: _page));
-    if (_page >= _maxPage) {
-      return IndicatorResult.noMore;
+
+    try {
+      final int nextFreshIdx = freshIdx + 1;
+      final List<RecVideoItemModel> result = await homeRepo.rcmdVideoList(
+        ps: ps,
+        freshIdx: nextFreshIdx,
+      );
+
+      if (result.isEmpty) {
+        _hasMore = false;
+        return IndicatorResult.noMore;
+      }
+
+      freshIdx = nextFreshIdx;
+      videoList.addAll(result);
+      _hasMore = result.length >= ps;
+      return _hasMore ? IndicatorResult.success : IndicatorResult.noMore;
+    } catch (_) {
+      return IndicatorResult.fail;
     }
-    return IndicatorResult.success;
   }
 
-  List<Map<String, String>> _buildPageData({required int page}) {
-    final int offset = (page - 1) * _pageSize;
-    return List<Map<String, String>>.generate(_pageSize, (int index) {
-      final Map<String, String> base =
-          _mockPool[(offset + index) % _mockPool.length];
-      return <String, String>{
-        'title': base['title'] ?? '',
-        'up': base['up'] ?? '',
-        'meta': base['meta'] ?? '',
-      };
-    });
+  Future<IndicatorResult> onRefreshHotVideos() async {
+    try {
+      hotPn = 1;
+      final List<HotVideoItemModel> result = await homeRepo.hotVideoList(
+        pn: hotPn,
+        ps: hotPs,
+      );
+      hotVideoList.assignAll(result);
+      _hotHasMore = result.length >= hotPs;
+      return IndicatorResult.success;
+    } catch (_) {
+      return IndicatorResult.fail;
+    }
+  }
+
+  Future<IndicatorResult> onLoadHotVideos() async {
+    if (!_hotHasMore) {
+      return IndicatorResult.noMore;
+    }
+
+    try {
+      final int nextPn = hotPn + 1;
+      final List<HotVideoItemModel> result = await homeRepo.hotVideoList(
+        pn: nextPn,
+        ps: hotPs,
+      );
+      if (result.isEmpty) {
+        _hotHasMore = false;
+        return IndicatorResult.noMore;
+      }
+      hotPn = nextPn;
+      hotVideoList.addAll(result);
+      _hotHasMore = result.length >= hotPs;
+      return _hotHasMore ? IndicatorResult.success : IndicatorResult.noMore;
+    } catch (_) {
+      return IndicatorResult.fail;
+    }
+  }
+
+  Future<IndicatorResult> onRefreshBangumi() async {
+    try {
+      bangumiPage = 1;
+      final BangumiListDataModel result = await homeRepo.bangumiList(
+        page: bangumiPage,
+      );
+      final List<BangumiListItemModel> list =
+          (result.list ?? <BangumiListItemModel>[])
+              .cast<BangumiListItemModel>();
+      bangumiList.assignAll(list);
+      _bangumiHasMore = (result.hasNext ?? 0) == 1 && list.length >= bangumiPs;
+      return IndicatorResult.success;
+    } catch (_) {
+      return IndicatorResult.fail;
+    }
+  }
+
+  Future<IndicatorResult> onLoadBangumi() async {
+    if (!_bangumiHasMore) {
+      return IndicatorResult.noMore;
+    }
+
+    try {
+      final int nextPage = bangumiPage + 1;
+      final BangumiListDataModel result = await homeRepo.bangumiList(
+        page: nextPage,
+      );
+      final List<BangumiListItemModel> list =
+          (result.list ?? <BangumiListItemModel>[])
+              .cast<BangumiListItemModel>();
+      if (list.isEmpty) {
+        _bangumiHasMore = false;
+        return IndicatorResult.noMore;
+      }
+      bangumiPage = nextPage;
+      bangumiList.addAll(list);
+      _bangumiHasMore = (result.hasNext ?? 0) == 1 && list.length >= bangumiPs;
+      return _bangumiHasMore ? IndicatorResult.success : IndicatorResult.noMore;
+    } catch (_) {
+      return IndicatorResult.fail;
+    }
+  }
+
+  Future<void> _loadFirstPage() async {
+    try {
+      freshIdx = 0;
+      final List<RecVideoItemModel> result = await homeRepo.rcmdVideoList(
+        ps: ps,
+        freshIdx: freshIdx,
+      );
+      videoList.assignAll(result);
+      _hasMore = result.length >= ps;
+    } catch (_) {
+      videoList.clear();
+      _hasMore = true;
+    }
+  }
+
+  Future<void> _loadHotFirstPage() async {
+    try {
+      hotPn = 1;
+      final List<HotVideoItemModel> result = await homeRepo.hotVideoList(
+        pn: hotPn,
+        ps: hotPs,
+      );
+      hotVideoList.assignAll(result);
+      _hotHasMore = result.length >= hotPs;
+    } catch (_) {
+      hotVideoList.clear();
+      _hotHasMore = true;
+    }
+  }
+
+  Future<void> _loadBangumiFirstPage() async {
+    try {
+      bangumiPage = 1;
+      final BangumiListDataModel result = await homeRepo.bangumiList(
+        page: bangumiPage,
+      );
+      final List<BangumiListItemModel> list =
+          (result.list ?? <BangumiListItemModel>[])
+              .cast<BangumiListItemModel>();
+      bangumiList.assignAll(list);
+      _bangumiHasMore = (result.hasNext ?? 0) == 1 && list.length >= bangumiPs;
+    } catch (_) {
+      bangumiList.clear();
+      _bangumiHasMore = true;
+    }
   }
 }

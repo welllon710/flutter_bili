@@ -84,9 +84,11 @@ class WooHttpUtil {
     if (!kReleaseMode) {
       _dio.interceptors.add(
         PrettyDioLogger(
-          requestHeader: true,
-          requestBody: true,
-          responseHeader: true,
+          requestHeader: false,
+          requestBody: false,
+          responseBody: false,
+          responseHeader: false,
+          error: false,
         ),
       );
     }

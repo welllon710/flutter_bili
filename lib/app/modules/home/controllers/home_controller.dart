@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:easy_refresh/easy_refresh.dart';
+import 'package:get_demo/app/data/models/b_search_model.dart';
 import 'package:get_demo/app/data/models/bangumi_list_data_model.dart';
 import 'package:get_demo/app/data/models/hot_video_item_model.dart';
 import 'package:get_demo/app/data/models/rec_video_item_model.dart';
@@ -7,9 +10,13 @@ import 'package:get_demo/app/data/repositories/homeRepo.dart';
 
 class HomeController extends GetxController {
   var currentIndex = 0.obs;
+
   final RxList<RecVideoItemModel> videoList = <RecVideoItemModel>[].obs;
   final RxList<HotVideoItemModel> hotVideoList = <HotVideoItemModel>[].obs;
   final RxList<BangumiListItemModel> bangumiList = <BangumiListItemModel>[].obs;
+  final RxString searchDefault = ''.obs;
+  Timer? _searchDefaultTimer;
+  bool _isLoadingSearchDefault = false;
 
   HomeRepo homeRepo = Get.put(HomeRepo());
 
@@ -27,15 +34,27 @@ class HomeController extends GetxController {
   bool _bangumiHasMore = true;
 
   @override
-  void onInit() async {
+  void onInit() {
     super.onInit();
-    await _loadFirstPage();
-    await _loadHotFirstPage();
-    await _loadBangumiFirstPage();
+    _startSearchDefaultTimer();
+    _loadInitialData();
+  }
+
+  @override
+  void onClose() {
+    _searchDefaultTimer?.cancel();
+    super.onClose();
   }
 
   void changeTab(int index) {
     currentIndex.value = index;
+  }
+
+  Future<void> _loadInitialData() async {
+    await _loadFirstPage();
+    await _loadHotFirstPage();
+    await _loadBangumiFirstPage();
+    await _loadSearchDefault();
   }
 
   Future<IndicatorResult> onRefreshVideos() async {
@@ -216,5 +235,26 @@ class HomeController extends GetxController {
       bangumiList.clear();
       _bangumiHasMore = true;
     }
+  }
+
+  Future<void> _loadSearchDefault() async {
+    if (_isLoadingSearchDefault) return;
+
+    _isLoadingSearchDefault = true;
+
+    try {
+      final BiliSearchModel result = await homeRepo.getSearchDefault();
+      searchDefault.value = result.showName ?? '';
+    } catch (_) {
+    } finally {
+      _isLoadingSearchDefault = false;
+    }
+  }
+
+  void _startSearchDefaultTimer() {
+    _searchDefaultTimer?.cancel();
+    _searchDefaultTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      _loadSearchDefault();
+    });
   }
 }

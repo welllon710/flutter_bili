@@ -1,5 +1,6 @@
 import 'package:get_demo/app/core/network/api.dart';
 import 'package:get_demo/app/core/network/dio_client.dart';
+import 'package:get_demo/app/data/models/b_search_model.dart';
 import 'package:get_demo/app/data/models/bangumi_list_data_model.dart';
 import 'package:get_demo/app/data/models/hot_video_item_model.dart';
 import 'package:get_demo/app/data/models/rec_video_item_model.dart';
@@ -54,5 +55,11 @@ class HomeRepo {
   Future<BangumiListDataModel> bangumiList({required int page}) async {
     var res = await _httpUtil.get(Api.bangumiList, params: {'page': page});
     return BangumiListDataModel.fromJson(res.data['data']);
+  }
+
+  Future<BiliSearchModel> getSearchDefault() async {
+    var res = await _httpUtil.get(Api.searchDefault);
+    BiliSearchModel searchDefault = BiliSearchModel.fromJson(res.data['data']);
+    return searchDefault;
   }
 }

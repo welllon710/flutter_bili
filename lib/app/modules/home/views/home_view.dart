@@ -38,7 +38,13 @@ class HomeView extends GetView<HomeController> {
               const SizedBox(width: 12),
               Expanded(
                 child: GestureDetector(
-                  onTap: () => Get.toNamed(Routes.SEARCH),
+                  onTap:
+                      () => Get.toNamed(
+                        Routes.SEARCH,
+                        arguments: {
+                          'defaultKeyword': controller.searchDefault.value,
+                        },
+                      ),
                   child: Container(
                     height: 36,
                     decoration: BoxDecoration(
@@ -47,26 +53,29 @@ class HomeView extends GetView<HomeController> {
                         color: theme.dividerColor.withValues(alpha: 0.5),
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 16),
-                        Icon(
-                          Icons.search_rounded,
-                          size: 20,
-                          color: theme.textTheme.bodyMedium?.color?.withValues(
-                            alpha: 0.6,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '搜索视频、UP 主、专栏',
-                          style: TextStyle(
+                    child: Obx(
+                      () => Row(
+                        children: [
+                          const SizedBox(width: 16),
+                          Icon(
+                            Icons.search_rounded,
+                            size: 20,
                             color: theme.textTheme.bodyMedium?.color
                                 ?.withValues(alpha: 0.6),
-                            fontSize: 14,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 8),
+                          Text(
+                            controller.searchDefault.value.isNotEmpty
+                                ? controller.searchDefault.value
+                                : '搜索',
+                            style: TextStyle(
+                              color: theme.textTheme.bodyMedium?.color
+                                  ?.withValues(alpha: 0.6),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

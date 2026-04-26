@@ -2,6 +2,7 @@ import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_demo/app/modules/home/widgets/video_card.dart';
+import 'package:get_demo/app/routes/app_pages.dart';
 
 import '../controllers/home_controller.dart';
 
@@ -45,7 +46,19 @@ class RecommendView extends GetView<HomeController> {
           ),
           itemBuilder: (_, int index) {
             final item = controller.videoList[index];
-            return VideoCard(item: item);
+            return VideoCard(
+              item: item,
+              onTap:
+                  () => Get.toNamed(
+                    Routes.VIDEO,
+                    arguments: {
+                      'bvid': item.bvid,
+                      'cid': item.cid,
+                      'aid': item.id,
+                      'title': item.title,
+                    },
+                  ),
+            );
           },
         ),
       ),

@@ -64,14 +64,18 @@ class HomeView extends GetView<HomeController> {
                                 ?.withValues(alpha: 0.6),
                           ),
                           const SizedBox(width: 8),
-                          Text(
-                            controller.searchDefault.value.isNotEmpty
-                                ? controller.searchDefault.value
-                                : '搜索',
-                            style: TextStyle(
-                              color: theme.textTheme.bodyMedium?.color
-                                  ?.withValues(alpha: 0.6),
-                              fontSize: 14,
+                          Expanded(
+                            child: Text(
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              controller.searchDefault.value.isNotEmpty
+                                  ? controller.searchDefault.value
+                                  : '搜索',
+                              style: TextStyle(
+                                color: theme.textTheme.bodyMedium?.color
+                                    ?.withValues(alpha: 0.6),
+                                fontSize: 14,
+                              ),
                             ),
                           ),
                         ],

@@ -9,6 +9,7 @@ abstract class Routes {
   static const ME = _Paths.ME;
   static const BOTTOM_BAR = _Paths.BOTTOM_BAR;
   static const SEARCH = _Paths.SEARCH;
+  static const VIDEO = _Paths.VIDEO;
 }
 
 abstract class _Paths {
@@ -19,4 +20,5 @@ abstract class _Paths {
   static const ME = '/me';
   static const BOTTOM_BAR = '/bottom-bar';
   static const SEARCH = '/search';
+  static const VIDEO = '/video';
 }

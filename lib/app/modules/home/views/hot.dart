@@ -2,6 +2,7 @@ import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_demo/app/modules/home/widgets/hot_video_card.dart';
+import 'package:get_demo/app/routes/app_pages.dart';
 
 import '../controllers/home_controller.dart';
 
@@ -40,7 +41,19 @@ class HotView extends GetView<HomeController> {
           separatorBuilder: (_, __) => const SizedBox(height: 10),
           itemBuilder: (_, int index) {
             final item = controller.hotVideoList[index];
-            return HotVideoCard(item: item);
+            return HotVideoCard(
+              item: item,
+              onTap:
+                  () => Get.toNamed(
+                    Routes.VIDEO,
+                    arguments: {
+                      'bvid': item.bvid,
+                      'cid': item.cid,
+                      'aid': item.aid,
+                      'title': item.title,
+                    },
+                  ),
+            );
           },
         ),
       ),

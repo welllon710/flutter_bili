@@ -50,15 +50,22 @@ class VideoPlayerArea extends StatelessWidget {
                 visible: controller.showPlayerControls.value,
                 title: controller.title.value,
                 isPlaying: controller.isPlaying.value,
-                sliderValue: activePos.clamp(0, total).toDouble(),
-                sliderMax: total.toDouble(),
+                progress: Duration(milliseconds: activePos.clamp(0, total)),
+                total: Duration(milliseconds: total),
                 progressText:
                     '${controller.formatDuration(activePos)} / ${controller.formatDuration(total)}',
                 onBack: Get.back,
                 onPlayPause: controller.togglePlayPause,
-                onSeekStart: controller.onSeekStart,
-                onSeekChanged: controller.onSeekChanged,
-                onSeekEnd: controller.onSeekEnd,
+                onSeekStart:
+                    (Duration position) =>
+                        controller.onSeekStart(position.inMilliseconds.toDouble()),
+                onSeekChanged:
+                    (Duration position) => controller.onSeekChanged(
+                      position.inMilliseconds.toDouble(),
+                    ),
+                onSeekEnd:
+                    (Duration position) =>
+                        controller.onSeekEnd(position.inMilliseconds.toDouble()),
                 onPortraitTap: controller.showControls,
               ),
             ],

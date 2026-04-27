@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 
 class VideoControlsOverlay extends StatelessWidget {
   const VideoControlsOverlay({
     required this.visible,
     required this.title,
     required this.isPlaying,
-    required this.sliderValue,
-    required this.sliderMax,
+    required this.progress,
+    required this.total,
     required this.progressText,
     required this.onBack,
     required this.onPlayPause,
@@ -20,14 +21,14 @@ class VideoControlsOverlay extends StatelessWidget {
   final bool visible;
   final String title;
   final bool isPlaying;
-  final double sliderValue;
-  final double sliderMax;
+  final Duration progress;
+  final Duration total;
   final String progressText;
   final VoidCallback onBack;
   final VoidCallback onPlayPause;
-  final ValueChanged<double> onSeekStart;
-  final ValueChanged<double> onSeekChanged;
-  final ValueChanged<double> onSeekEnd;
+  final ValueChanged<Duration> onSeekStart;
+  final ValueChanged<Duration> onSeekChanged;
+  final ValueChanged<Duration> onSeekEnd;
   final VoidCallback onPortraitTap;
 
   @override
@@ -92,30 +93,31 @@ class VideoControlsOverlay extends StatelessWidget {
                   IconButton(
                     onPressed: onPlayPause,
                     icon: Icon(
-                      isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                      isPlaying
+                          ? Icons.pause_rounded
+                          : Icons.play_arrow_rounded,
                       color: Colors.white,
                       size: 24,
                     ),
                   ),
                   Expanded(
-                    child: SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        trackHeight: 2.5,
-                        thumbShape: const RoundSliderThumbShape(
-                          enabledThumbRadius: 5,
-                        ),
-                        overlayShape: const RoundSliderOverlayShape(
-                          overlayRadius: 12,
-                        ),
-                      ),
-                      child: Slider(
-                        value: sliderValue,
-                        min: 0,
-                        max: sliderMax,
-                        onChangeStart: onSeekStart,
-                        onChanged: onSeekChanged,
-                        onChangeEnd: onSeekEnd,
-                      ),
+                    child: ProgressBar(
+                      progress: progress,
+                      total: total,
+                      barHeight: 2.5,
+                      thumbRadius: 5,
+                      timeLabelLocation: TimeLabelLocation.none,
+                      baseBarColor: Colors.white.withValues(alpha: 0.28),
+                      bufferedBarColor: Colors.white.withValues(alpha: 0.42),
+                      progressBarColor: Colors.white,
+                      thumbColor: Colors.white,
+                      onDragStart: (ThumbDragDetails details) {
+                        onSeekStart(details.timeStamp);
+                      },
+                      onDragUpdate: (ThumbDragDetails details) {
+                        onSeekChanged(details.timeStamp);
+                      },
+                      onSeek: onSeekEnd,
                     ),
                   ),
                   const SizedBox(width: 4),

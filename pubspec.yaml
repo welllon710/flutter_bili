@@ -53,6 +53,9 @@ dependencies:
   media_kit_libs_video: ^1.0.7 # Native video dependencies.
   media_kit_libs_macos_video: ^1.1.4
   media_kit_libs_ios_video: ^1.1.4
+  audio_video_progress_bar: ^2.0.3
+  expandable: ^5.0.1
+  like_button: ^2.1.0
 
 dev_dependencies:
   flutter_test:

@@ -36,6 +36,9 @@ class Api {
   // https://api.bilibili.com/x/web-interface/archive/has/like
   static const String hasLikeVideo = '/x/web-interface/archive/has/like';
 
+  //   // 视频在线人数（双端）
+  static const String onlineCount = "/x/v2/view/video/online";
+
   // 视频点踩 web端不支持
 
   // 投币视频（web端）POST

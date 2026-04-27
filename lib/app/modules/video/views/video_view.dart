@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:get_demo/app/modules/video/controllers/video_controller.dart';
+import 'package:get_demo/app/modules/video/widgets/video_comment_tab.dart';
+import 'package:get_demo/app/modules/video/widgets/video_intro_tab.dart';
 import 'package:get_demo/app/modules/video/widgets/video_player_area.dart';
 
 class VideoView extends GetView<VideoCustomController> {
@@ -120,42 +122,7 @@ class VideoView extends GetView<VideoCustomController> {
               ];
             },
             body: TabBarView(
-              children: [
-                ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                  children: [
-                    Text(
-                      controller.title.value.isNotEmpty
-                          ? controller.title.value
-                          : '视频简介',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      '这里先放简介内容区域，后面我们可以继续接视频详情接口、UP 主信息和相关推荐。',
-                      style: theme.textTheme.bodyMedium?.copyWith(height: 1.6),
-                    ),
-                  ],
-                ),
-                ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                  children: [
-                    Text(
-                      '评论区',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      '这里先放评论内容区域，后面我们可以继续对接评论列表接口。',
-                      style: theme.textTheme.bodyMedium?.copyWith(height: 1.6),
-                    ),
-                  ],
-                ),
-              ],
+              children: [VideoIntroTab(controller: controller), VideoCommentTab()],
             ),
           ),
         ),

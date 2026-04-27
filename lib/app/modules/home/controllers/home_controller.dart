@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:get/get.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:get_demo/app/data/models/b_search_model.dart';
@@ -7,6 +5,7 @@ import 'package:get_demo/app/data/models/bangumi_list_data_model.dart';
 import 'package:get_demo/app/data/models/hot_video_item_model.dart';
 import 'package:get_demo/app/data/models/rec_video_item_model.dart';
 import 'package:get_demo/app/data/repositories/homeRepo.dart';
+import 'package:get_demo/app/utils/polling_runner.dart';
 
 class HomeController extends GetxController {
   var currentIndex = 0.obs;
@@ -15,7 +14,7 @@ class HomeController extends GetxController {
   final RxList<HotVideoItemModel> hotVideoList = <HotVideoItemModel>[].obs;
   final RxList<BangumiListItemModel> bangumiList = <BangumiListItemModel>[].obs;
   final RxString searchDefault = ''.obs;
-  Timer? _searchDefaultTimer;
+  PollingRunner? _searchDefaultPolling;
   bool _isLoadingSearchDefault = false;
 
   HomeRepo homeRepo = Get.put(HomeRepo());
@@ -42,7 +41,7 @@ class HomeController extends GetxController {
 
   @override
   void onClose() {
-    _searchDefaultTimer?.cancel();
+    _searchDefaultPolling?.dispose();
     super.onClose();
   }
 
@@ -252,9 +251,11 @@ class HomeController extends GetxController {
   }
 
   void _startSearchDefaultTimer() {
-    _searchDefaultTimer?.cancel();
-    _searchDefaultTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-      _loadSearchDefault();
-    });
+    _searchDefaultPolling?.dispose();
+    _searchDefaultPolling = PollingRunner(
+      callback: _loadSearchDefault,
+      interval: const Duration(minutes: 1),
+    );
+    _searchDefaultPolling?.start();
   }
 }

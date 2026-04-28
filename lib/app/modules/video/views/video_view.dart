@@ -5,6 +5,7 @@ import 'package:get_demo/app/modules/video/controllers/video_controller.dart';
 import 'package:get_demo/app/modules/video/widgets/video_comment_tab.dart';
 import 'package:get_demo/app/modules/video/widgets/video_intro_tab.dart';
 import 'package:get_demo/app/modules/video/widgets/video_player_area.dart';
+import 'package:get_demo/app/utils/utils.dart';
 
 class VideoView extends GetView<VideoCustomController> {
   const VideoView({super.key});
@@ -47,26 +48,49 @@ class VideoView extends GetView<VideoCustomController> {
                         children: [
                           Expanded(
                             flex: 1,
-                            child: TabBar(
-                              // padding: const EdgeInsets.symmetric(
-                              //   horizontal: 10,
-                              // ),
-                              isScrollable: true,
-                              dividerColor: Colors.transparent,
-                              indicatorSize: TabBarIndicatorSize.label,
-                              tabAlignment: TabAlignment.start,
-                              // labelPadding: const EdgeInsets.only(left: 30),
-                              labelColor: colorScheme.primary,
-                              unselectedLabelColor:
-                                  colorScheme.onSurfaceVariant,
-                              labelStyle: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                              ),
-                              unselectedLabelStyle: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                              ),
-                              tabs: const [Tab(text: '简介'), Tab(text: '评论')],
-                            ),
+                            child: Obx(() {
+                              final int replyCount =
+                                  controller.introData.value?.stat?.reply ?? 0;
+                              final String replyText = Utils.numFormat(
+                                replyCount,
+                              );
+
+                              return TabBar(
+                                // padding: const EdgeInsets.symmetric(
+                                //   horizontal: 10,
+                                // ),
+                                isScrollable: true,
+                                dividerColor: Colors.transparent,
+                                indicatorSize: TabBarIndicatorSize.label,
+                                tabAlignment: TabAlignment.start,
+                                // labelPadding: const EdgeInsets.only(left: 30),
+                                labelColor: colorScheme.primary,
+                                unselectedLabelColor:
+                                    colorScheme.onSurfaceVariant,
+                                labelStyle: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                unselectedLabelStyle: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                tabs: [
+                                  const Tab(text: '简介'),
+                                  Tab(
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Text('评论'),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          replyText,
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -122,7 +146,10 @@ class VideoView extends GetView<VideoCustomController> {
               ];
             },
             body: TabBarView(
-              children: [VideoIntroTab(controller: controller), VideoCommentTab()],
+              children: [
+                VideoIntroTab(controller: controller),
+                VideoCommentTab(),
+              ],
             ),
           ),
         ),

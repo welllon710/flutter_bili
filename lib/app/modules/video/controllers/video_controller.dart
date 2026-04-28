@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:get_demo/app/core/network/constants.dart';
 import 'package:get_demo/app/data/models/Ppay_url_model.dart';
+import 'package:get_demo/app/data/models/hot_video_item_model.dart';
+import 'package:get_demo/app/data/models/user_fas_model.dart';
 import 'package:get_demo/app/data/models/video_detail_response.dart';
 import 'package:get_demo/app/data/models/video_online_count.dart';
 import 'package:get_demo/app/data/repositories/videoRepo.dart';
@@ -26,6 +28,11 @@ class VideoCustomController extends GetxController {
   final RxString introError = ''.obs;
   final Rxn<VideoDetailData> introData = Rxn<VideoDetailData>();
   final RxString onlineTotal = ''.obs;
+  final RxString followerTotal = ''.obs;
+  final RxBool isRelatedLoading = false.obs;
+  final RxString relatedError = ''.obs;
+  final RxList<HotVideoItemModel> relatedVideoList = <HotVideoItemModel>[].obs;
+  String _relatedBvid = '';
 
   late final Player player;
   late final media_kit_video.VideoController playerController;
@@ -64,7 +71,14 @@ class VideoCustomController extends GetxController {
     final String bvid = (map['bvid'] ?? '').toString();
     final int cid = _toInt(map['cid']);
     final int avid = _toInt(map['aid'] ?? map['avid']);
+    final int mid = _toInt(map['mid']);
     title.value = (map['title'] ?? map['name'] ?? '视频播放').toString();
+    if (mid > 0) {
+      _loadUsetStat(mid: mid);
+    }
+    if (bvid.isNotEmpty) {
+      _loadRelatedList(bvid: bvid);
+    }
     _loadVideoIntro(
       bvid: bvid.isNotEmpty ? bvid : null,
       avid: avid > 0 ? avid : null,
@@ -227,8 +241,16 @@ class VideoCustomController extends GetxController {
         }
         final int aid = response.data?.aid ?? 0;
         final int cid = response.data?.cid ?? 0;
+        final int mid = response.data?.owner?.mid ?? 0;
+        final String bvid = response.data?.bvid ?? '';
         if (aid > 0 && cid > 0) {
           _startOnlineCountPolling(aid: aid, cid: cid);
+        }
+        if (mid > 0) {
+          _loadUsetStat(mid: mid);
+        }
+        if (bvid.isNotEmpty) {
+          _loadRelatedList(bvid: bvid);
         }
       } else {
         introError.value = response.message ?? '简介加载失败';
@@ -265,5 +287,35 @@ class VideoCustomController extends GetxController {
       interval: const Duration(minutes: 1),
     );
     _onlineCountPolling?.start();
+  }
+
+  Future<void> _loadUsetStat({required int mid}) async {
+    if (mid <= 0) return;
+    try {
+      final UserFasModel result = await _videoRepo.getUserStat(mid: mid);
+      followerTotal.value = result.data.follower.toString();
+    } catch (_) {}
+  }
+
+  Future<void> _loadRelatedList({required String bvid}) async {
+    if (bvid.isEmpty) return;
+    if (isRelatedLoading.value) return;
+    if (_relatedBvid == bvid && relatedVideoList.isNotEmpty) return;
+
+    isRelatedLoading.value = true;
+    relatedError.value = '';
+    _relatedBvid = bvid;
+
+    try {
+      final List<HotVideoItemModel> result = await _videoRepo.getRelatedList(
+        bvid: bvid,
+      );
+      relatedVideoList.assignAll(result);
+    } catch (_) {
+      relatedError.value = '相关推荐加载失败';
+      relatedVideoList.clear();
+    } finally {
+      isRelatedLoading.value = false;
+    }
   }
 }

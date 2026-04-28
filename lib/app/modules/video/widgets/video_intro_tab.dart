@@ -1,8 +1,12 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:get_demo/app/data/models/video_detail_response.dart';
+import 'package:get_demo/app/modules/home/widgets/hot_video_card.dart';
 import 'package:get_demo/app/modules/home/widgets/optimized_network_image.dart';
 import 'package:get_demo/app/modules/video/controllers/video_controller.dart';
+import 'package:get_demo/app/routes/app_pages.dart';
 import 'package:get_demo/app/utils/utils.dart';
 import 'package:like_button/like_button.dart';
 
@@ -70,13 +74,30 @@ class VideoIntroTab extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(
-                  data.owner?.name ?? 'UP主',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      data.owner?.name ?? 'UP主',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      controller.followerTotal.value.isNotEmpty
+                          ? '${Utils.numFormat(int.tryParse(controller.followerTotal.value) ?? controller.followerTotal.value)}粉丝'
+                          : '粉丝获取中',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               FilledButton.icon(
@@ -173,9 +194,457 @@ class VideoIntroTab extends StatelessWidget {
               ),
             ),
           ),
+          if ((data.ugcSeason?.sections ?? []).any(
+            (SectionItem section) => (section.episodes ?? []).isNotEmpty,
+          )) ...[
+            const SizedBox(height: 18),
+            _UgcSeasonSection(
+              ugcSeason: data.ugcSeason!,
+              currentBvid: data.bvid ?? '',
+            ),
+          ],
+          const SizedBox(height: 18),
+          Text(
+            '相关推荐',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 10),
+          if (controller.isRelatedLoading.value &&
+              controller.relatedVideoList.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (controller.relatedError.value.isNotEmpty &&
+              controller.relatedVideoList.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                controller.relatedError.value,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            )
+          else if (controller.relatedVideoList.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                '暂无相关推荐',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            )
+          else
+            ...controller.relatedVideoList.map((item) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: HotVideoCard(
+                  item: item,
+                  onTap:
+                      () => Get.toNamed(
+                        Routes.VIDEO,
+                        arguments: {
+                          'bvid': item.bvid,
+                          'cid': item.cid,
+                          'aid': item.aid,
+                          'title': item.title,
+                        },
+                      ),
+                ),
+              );
+            }),
         ],
       );
     });
+  }
+}
+
+class _UgcSeasonSection extends StatelessWidget {
+  const _UgcSeasonSection({required this.ugcSeason, required this.currentBvid});
+
+  static const String _seasonDialogTag = 'ugc_season_dialog';
+
+  final UgcSeason ugcSeason;
+  final String currentBvid;
+
+  void _showSeasonEpisodesSheet(
+    BuildContext context,
+    List<EpisodeItem> episodes,
+  ) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+
+    SmartDialog.show<void>(
+      tag: _seasonDialogTag,
+      keepSingle: true,
+      clickMaskDismiss: true,
+      alignment: Alignment.bottomCenter,
+      animationType: SmartAnimationType.centerFade_otherSlide,
+      maskColor: Colors.black.withValues(alpha: 0.45),
+      builder: (BuildContext dialogContext) {
+        return Material(
+          color: colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+          clipBehavior: Clip.antiAlias,
+          child: SafeArea(
+            top: false,
+            child: SizedBox(
+              width: MediaQuery.of(dialogContext).size.width,
+              height: MediaQuery.of(dialogContext).size.height * 0.72,
+              child: Column(
+                children: [
+                  const SizedBox(height: 10),
+                  Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: colorScheme.outlineVariant,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 12, 10),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            ugcSeason.title?.isNotEmpty == true
+                                ? ugcSeason.title!
+                                : '合集',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '${ugcSeason.epCount ?? episodes.length}个视频',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed:
+                              () => SmartDialog.dismiss(
+                                status: SmartStatus.custom,
+                                tag: _seasonDialogTag,
+                              ),
+                          icon: const Icon(Icons.close_rounded),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 18),
+                      itemCount: episodes.length,
+                      itemBuilder: (_, int index) {
+                        final EpisodeItem episode = episodes[index];
+                        final bool isCurrent =
+                            currentBvid.isNotEmpty &&
+                            episode.bvid == currentBvid;
+                        final bool canOpen =
+                            episode.bvid?.isNotEmpty == true &&
+                            (episode.cid ?? 0) > 0;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: _UgcEpisodeCard(
+                            episode: episode,
+                            isCurrent: isCurrent,
+                            onTap:
+                                canOpen
+                                    ? () {
+                                      SmartDialog.dismiss(
+                                        status: SmartStatus.custom,
+                                        tag: _seasonDialogTag,
+                                      );
+                                      Get.toNamed(
+                                        Routes.VIDEO,
+                                        arguments: {
+                                          'bvid': episode.bvid,
+                                          'cid': episode.cid,
+                                          'aid': episode.aid,
+                                          'title': episode.title,
+                                        },
+                                      );
+                                    }
+                                    : null,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    final List<EpisodeItem> episodes =
+        ugcSeason.sections
+            ?.expand(
+              (SectionItem section) => section.episodes ?? <EpisodeItem>[],
+            )
+            .toList() ??
+        <EpisodeItem>[];
+
+    if (episodes.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                ugcSeason.title?.isNotEmpty == true ? ugcSeason.title! : '合集',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            Text(
+              '${ugcSeason.epCount ?? episodes.length}个视频',
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        if (ugcSeason.intro?.isNotEmpty == true) ...[
+          const SizedBox(height: 6),
+          Text(
+            ugcSeason.intro!,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              height: 1.45,
+            ),
+          ),
+        ],
+        const SizedBox(height: 10),
+        InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => _showSeasonEpisodesSheet(context, episodes),
+          child: Ink(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.35,
+              ),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.video_library_outlined,
+                    color: colorScheme.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '查看合集视频',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '共${episodes.length}个视频，点击展开',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _UgcEpisodeCard extends StatelessWidget {
+  const _UgcEpisodeCard({
+    required this.episode,
+    required this.isCurrent,
+    this.onTap,
+  });
+
+  final EpisodeItem episode;
+  final bool isCurrent;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: onTap,
+      child: Ink(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color:
+              isCurrent
+                  ? colorScheme.primary.withValues(alpha: 0.08)
+                  : colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+          borderRadius: BorderRadius.circular(14),
+          border:
+              isCurrent
+                  ? Border.all(
+                    color: colorScheme.primary.withValues(alpha: 0.35),
+                  )
+                  : null,
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: SizedBox(
+                width: 120,
+                height: 72,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    OptimizedNetworkImage(
+                      url: episode.cover ?? '',
+                      fit: BoxFit.cover,
+                    ),
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withValues(alpha: 0.02),
+                              Colors.black.withValues(alpha: 0.7),
+                            ],
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              Utils.timeFormat(episode.page?.duration ?? 0),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      if (isCurrent) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            '播放中',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: colorScheme.onPrimary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                      ],
+                      Expanded(
+                        child: Text(
+                          episode.title?.isNotEmpty == true
+                              ? episode.title!
+                              : episode.page?.pagePart ?? '合集视频',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            height: 1.3,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    episode.page?.pagePart?.isNotEmpty == true
+                        ? episode.page!.pagePart!
+                        : '第${episode.page?.page ?? 0}P',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

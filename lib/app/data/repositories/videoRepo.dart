@@ -1,6 +1,8 @@
 import 'package:get_demo/app/core/network/api.dart';
 import 'package:get_demo/app/core/network/dio_client.dart';
 import 'package:get_demo/app/data/models/Ppay_url_model.dart';
+import 'package:get_demo/app/data/models/hot_video_item_model.dart';
+import 'package:get_demo/app/data/models/user_fas_model.dart';
 import 'package:get_demo/app/data/models/video_detail_response.dart';
 import 'package:get_demo/app/data/models/video_online_count.dart';
 
@@ -54,5 +56,18 @@ class VideoRepo {
       params: {'aid': aid, 'cid': cid},
     );
     return VideoOnlineCount.fromJson(res.data);
+  }
+
+  Future<UserFasModel> getUserStat({required int mid}) async {
+    final res = await _httpUtil.get(Api.userStat, params: {'vmid': mid});
+    return UserFasModel.fromJson(res.data);
+  }
+
+  Future<List<HotVideoItemModel>> getRelatedList({required String bvid}) async {
+    final res = await _httpUtil.get(Api.relatedList, params: {'bvid': bvid});
+    final List<dynamic> rawList = (res.data['data'] as List<dynamic>? ?? []);
+    return rawList
+        .map((dynamic item) => HotVideoItemModel.fromJson(item))
+        .toList();
   }
 }
